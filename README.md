@@ -1,9 +1,9 @@
-# Spawner
+# Spawner (eip1167-spawner)
 
-![npm](https://img.shields.io/npm/v/eip1167-spawner.svg?color=light-green)
+![npm](https://img.shields.io/npm/v/eip1167-spawner.svg?color=brightgreen)
 ![GitHub](https://img.shields.io/github/license/0age/Spawner.svg?colorB=brightgreen)
 [![Build Status](https://travis-ci.org/0age/Spawner.svg?branch=master)](https://travis-ci.org/0age/Spawner)
-[![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+[![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
 > Spawn EIP 1167 minimal proxies with an included initialization step during contract creation.
