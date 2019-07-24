@@ -19,7 +19,7 @@ These contracts demonstrate a technique for initializing and deploying [EIP 1167
 - [License](#license)
 
 ## Install
-To installlocally, you'll need Node.js 10+ and Yarn *(or npm)*. To get everything set up:
+To install locally, you'll need Node.js 10+ and Yarn *(or npm)*. To get everything set up:
 ```sh
 $ git clone https://github.com/0age/Spawner.git
 $ cd Spawner
