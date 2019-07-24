@@ -1,6 +1,6 @@
 {
   "name": "Spawner",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Spawn EIP 1167 minimal proxies with an included initialization step during contract creation.",
   "author": "0age",
   "license": "MIT",
