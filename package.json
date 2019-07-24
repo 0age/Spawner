@@ -1,10 +1,10 @@
 {
   "name": "Spawner",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Spawn EIP 1167 minimal proxies with an included initialization step during contract creation.",
   "author": "0age",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "ethereumjs-util": "^6.1.0",
     "ganache-cli": "6.3.0",
     "truffle": "^5.0.22",
