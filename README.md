@@ -1,5 +1,6 @@
 # Spawner
 
+![npm](https://img.shields.io/npm/v/eip1167-spawner.svg?color=light-green)
 ![GitHub](https://img.shields.io/github/license/0age/Spawner.svg?colorB=brightgreen)
 [![Build Status](https://travis-ci.org/0age/Spawner.svg?branch=master)](https://travis-ci.org/0age/Spawner)
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
@@ -13,12 +14,16 @@ These contracts demonstrate a technique for initializing and deploying [EIP 1167
 
 - [Install](#install)
 - [Usage](#usage)
-- [API](#api)
 - [Maintainers](#maintainers)
 - [Contribute](#contribute)
 - [License](#license)
 
 ## Install
+To include Spawner as a dependency in your project:
+```
+$ yarn add eip1167-spawner
+```
+
 To install locally, you'll need Node.js 10+ and Yarn *(or npm)*. To get everything set up:
 ```sh
 $ git clone https://github.com/0age/Spawner.git
@@ -28,18 +33,33 @@ $ yarn build
 ```
 
 ## Usage
-Inherit Spawner on a contract and call `_spawn` with the desired logic contract and ABI-encoded initialization calldata:
+Import Spawner and inherit it on a contract, then call `_spawn` with the desired logic contract and ABI-encoded initialization calldata:
+```Solidity
+pragma solidity ^0.5.0;
 
+import "eip1167-spawner/contracts/Spawner.sol";
+import "./MyLogicContract.sol";
+
+
+contract MyFactory is Spawner {
+  function spawnIt() public returns (address spawnedContract) {
+    MyLogicContract logic = MyLogicContract(address(...));
+    
+    bytes memory myInitializationCalldata = abi.encodeWithSelector(
+      logic.initialize.selector,
+      "argumentOne",
+      "argumentTwo"
+    );
+    
+    spawnedContract =  _spawn(
+      address(logicContract),
+      myInitializationCalldata
+    );
+  }
+}
 ```
-address spawnedContract = _spawn(
-  address(logicContract),
-  abi.encodeWithSelector(
-  	logicContract.initialize.selector,
-  	exampleArgumentOne,
-  	exampleArgumentTwo
-  )
-);
-```
+
+You can also use `_spawnCompact` *(for logic contracts with at least five leading zero bytes or ten zeroes)*, `_spawnOldSchool` *(for deploying with `CREATE` rather than `CREATE2`)*, or `_spawnCompactOldSchool`.
 
 To run tests locally, start the testRPC, trigger the tests, and tear down the testRPC *(you can do all of this at once via* `yarn all` *if you prefer)*:
 ```sh
