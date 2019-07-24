@@ -128,7 +128,7 @@ contract Spawner {
 
     // place creation code and constructor args of contract to spawn in memory.
     bytes memory initCode = abi.encodePacked(
-      type(Spawn).creationCode,
+      type(SpawnCompact).creationCode,
       abi.encode(compactLogicContract, initializationCalldata)
     );
 
@@ -182,7 +182,7 @@ contract Spawner {
 
     // place creation code and constructor args of contract to spawn in memory.
     bytes memory initCode = abi.encodePacked(
-      type(Spawn).creationCode,
+      type(SpawnCompact).creationCode,
       abi.encode(compactLogicContract, initializationCalldata)
     );
 
