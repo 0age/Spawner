@@ -19,6 +19,7 @@ contract SpawnerTester is Spawner {
       address(logic),
       abi.encodeWithSelector(logic.initialize.selector, testValue, testString)
     );
+
     ExampleLogicContract implementation = ExampleLogicContract(spawnedContract);
 
     // call it and check that it was correctly set up.
@@ -31,6 +32,27 @@ contract SpawnerTester is Spawner {
 
     // ensure that the contract cannot be initialized again.
     (bool ok, ) = spawnedContract.call(
+      abi.encodeWithSelector(logic.initialize.selector, address(0), testString)
+    );
+    require(!ok, "does not prevent re-initialization correctly");
+
+    // spawn a new contract with the same logic contract and initializer data.
+    spawnedContract = _spawn(
+      address(logic),
+      abi.encodeWithSelector(logic.initialize.selector, testValue, testString)
+    );
+    ExampleLogicContract implTwo = ExampleLogicContract(spawnedContract);
+
+    // call it and check that it was correctly set up.
+    require(implTwo.hasBeenInitialized(), "not initialized correctly");
+    require(implTwo.testValue() == testValue, "incorrect test value");
+    require(
+      keccak256(bytes(implTwo.testString())) == testStringHash,
+      "incorrect test string"
+    );
+
+    // ensure that the contract cannot be initialized again.
+    (ok, ) = spawnedContract.call(
       abi.encodeWithSelector(logic.initialize.selector, address(0), testString)
     );
     require(!ok, "does not prevent re-initialization correctly");

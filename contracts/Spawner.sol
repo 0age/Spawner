@@ -48,20 +48,52 @@ contract Spawner {
     address logicContract,
     bytes memory initializationCalldata
   ) internal returns (address spawnedContract) {
-    // example create2 salt derivation - tweak to taste: nonce, extcodehash, etc
-    bytes32 salt = keccak256(
-      abi.encodePacked(
-        msg.sender,
-        logicContract,
-        initializationCalldata
-      )
-    );
-
     // place creation code and constructor args of contract to spawn in memory.
     bytes memory initCode = abi.encodePacked(
       type(Spawn).creationCode,
       abi.encode(logicContract, initializationCalldata)
     );
+
+    // get the keccak256 hash of the init code for address derivation.
+    bytes32 initCodeHash = keccak256(initCode);
+
+    // set the initial nonce to be provided when constructing the salt.
+    uint256 nonce = 0;
+    
+    // declare variables for salt value and code size of derived address.
+    bytes32 salt;
+    uint256 codeSize;
+
+    while (true) {
+      // derive create2 salt using msg.sender and nonce.
+      salt = keccak256(abi.encodePacked(msg.sender, nonce));
+
+      address target = address(    // derive the target deployment address.
+        uint160(                   // downcast to match the address type.
+          uint256(                 // cast to uint to truncate upper digits.
+            keccak256(             // compute CREATE2 hash using 4 inputs.
+              abi.encodePacked(    // pack all inputs to the hash together.
+                bytes1(0xff),      // pass in the control character.
+                address(this),     // pass in the address of this contract.
+                salt,              // pass in the salt from above.
+                initCodeHash       // pass in hash of contract creation code.
+              )
+            )
+          )
+        )
+      );
+
+      // determine if a contract is already deployed to the target address.
+      assembly { codeSize := extcodesize(target) }
+
+      // exit the loop if no contract is deployed to the target address.
+      if (codeSize == 0) {
+        break;
+      }
+
+      // otherwise, increment the nonce and derive a new salt.
+      nonce++;
+    }
 
     assembly {
       let encoded_data := add(0x20, initCode) // load initialization code.
