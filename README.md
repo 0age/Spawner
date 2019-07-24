@@ -1,7 +1,7 @@
 # Spawner (eip1167-spawner)
 
-![npm](https://img.shields.io/npm/v/eip1167-spawner.svg?color=brightgreen)
-![GitHub](https://img.shields.io/github/license/0age/Spawner.svg?colorB=brightgreen)
+[![npm](https://img.shields.io/npm/v/eip1167-spawner.svg?color=brightgreen)](https://www.npmjs.com/package/eip1167-spawner)
+[![GitHub](https://img.shields.io/github/license/0age/Spawner.svg?colorB=brightgreen)](https://github.com/0age/Spawner/blob/master/LICENSE.md)
 [![Build Status](https://travis-ci.org/0age/Spawner.svg?branch=master)](https://travis-ci.org/0age/Spawner)
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
