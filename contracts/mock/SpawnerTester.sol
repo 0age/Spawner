@@ -14,11 +14,19 @@ contract SpawnerTester is Spawner {
     string memory testString = "this is a test string.";
     bytes32 testStringHash = keccak256(bytes(testString));
 
+    // find an address ahead of time.
+    address precomputeSpawnedContract = computeNextAddress(
+      address(logic),
+      abi.encodeWithSelector(logic.initialize.selector, testValue, testString)
+    );
+
     // spawn a contract, providing logic contract address and initializer data.
     address spawnedContract = _spawn(
       address(logic),
       abi.encodeWithSelector(logic.initialize.selector, testValue, testString)
     );
+
+    require(precomputeSpawnedContract == spawnedContract, "precompute failed.");
 
     ExampleLogicContract implementation = ExampleLogicContract(spawnedContract);
 
@@ -36,11 +44,20 @@ contract SpawnerTester is Spawner {
     );
     require(!ok, "does not prevent re-initialization correctly");
 
+    // find the next address ahead of time.
+    precomputeSpawnedContract = computeNextAddress(
+      address(logic),
+      abi.encodeWithSelector(logic.initialize.selector, testValue, testString)
+    );
+
     // spawn a new contract with the same logic contract and initializer data.
     spawnedContract = _spawn(
       address(logic),
       abi.encodeWithSelector(logic.initialize.selector, testValue, testString)
     );
+
+    require(precomputeSpawnedContract == spawnedContract, "precompute failed.");
+
     ExampleLogicContract implTwo = ExampleLogicContract(spawnedContract);
 
     // call it and check that it was correctly set up.

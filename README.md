@@ -59,7 +59,9 @@ contract MyFactory is Spawner {
 }
 ```
 
-You can also use `_spawnCompact` *(for logic contracts with at least five leading zero bytes or ten zeroes)*, `_spawnOldSchool` *(for deploying with `CREATE` rather than `CREATE2`)*, or `_spawnCompactOldSchool`.
+You can also use `_spawnCompact` *(for logic contracts with at least five leading zero bytes or ten zeroes)*, `_spawnOldSchool` *(for deploying with `CREATE` rather than `CREATE2`)*, or `_spawnCompactOldSchool`. In addition, you can compute addresses spawned with `CREATE2` ahead of time by using the supplied `computeNextAddress` and `computeNextCompactAddress` view functions.
+
+Note: Spawner will be careful not to deploy to any address that already has code at it, but watch out - if the code that the minimal proxy points to can cause a `SELFDESTRUCT`, it is possible that Spawner may *redeploy* a minimal proxy to an address it has already deployed to in the past. This may or may not be the intended behavior, so feel free to put in extra safeguards if you're worried about this.
 
 To run tests locally, start the testRPC, trigger the tests, and tear down the testRPC *(you can do all of this at once via* `yarn all` *if you prefer)*:
 ```sh

@@ -85,6 +85,60 @@ contract SpawnCompact {
  */
 contract Spawner {
   /**
+   * @notice External view function for finding the address of the next standard
+   * eip-1167 minimal proxy created using `CREATE2` with a given logic contract
+   * and initialization calldata payload.
+   * @param logicContract address The address of the logic contract.
+   * @param initializationCalldata bytes The calldata that will be supplied to
+   * the `DELEGATECALL` from the spawned contract to the logic contract during
+   * contract creation.
+   * @return The address of the next spawned minimal proxy contract with the
+   * given parameters.
+   */
+  function computeNextAddress(
+    address logicContract,
+    bytes memory initializationCalldata
+  ) public view returns (address target) {
+    // place creation code and constructor args of contract to spawn in memory.
+    bytes memory initCode = abi.encodePacked(
+      type(Spawn).creationCode,
+      abi.encode(logicContract, initializationCalldata)
+    );
+
+    // get target address using the constructed initialization code.
+    (, target) = _getSaltAndTarget(initCode);
+  }
+
+  /**
+   * @notice External view function for finding the address of the next compact
+   * eip-1167 minimal proxy created using `CREATE2` with a given logic contract
+   * and initialization calldata payload.
+   * @param compactLogicContract address The address of the logic contract. It
+   * must begin with at least five zero bytes, or ten zeroes.
+   * @param initializationCalldata bytes The calldata that will be supplied to
+   * the `DELEGATECALL` from the spawned contract to the logic contract during
+   * contract creation.
+   * @return The address of the next spawned compact minimal proxy contract with
+   * the given parameters.
+   */
+  function computeNextCompactAddress(
+    address compactLogicContract,
+    bytes memory initializationCalldata
+  ) public view returns (address target) {
+    // ensure that the address is sufficiently compact.
+    _ensureCompact(compactLogicContract);
+
+    // place creation code and constructor args of contract to spawn in memory.
+    bytes memory initCode = abi.encodePacked(
+      type(SpawnCompact).creationCode,
+      abi.encode(compactLogicContract, initializationCalldata)
+    );
+
+    // get target address using the constructed initialization code.
+    (, target) = _getSaltAndTarget(initCode);
+  }
+
+  /**
    * @notice Internal function for spawning an eip-1167 minimal proxy using
    * `CREATE2`.
    * @param logicContract address The address of the logic contract.
@@ -227,21 +281,49 @@ contract Spawner {
   function _spawnCreate2(
     bytes memory initCode
   ) private returns (address spawnedContract) {
+    // get salt to use during deployment using the supplied initialization code.
+    (bytes32 salt, ) = _getSaltAndTarget(initCode);
+
+    assembly {
+      let encoded_data := add(0x20, initCode) // load initialization code.
+      let encoded_size := mload(initCode)     // load the init code's length.
+      spawnedContract := create2(             // call `CREATE2` w/ 4 arguments.
+        callvalue,                            // forward any supplied endowment.
+        encoded_data,                         // pass in initialization code.
+        encoded_size,                         // pass in init code's length.
+        salt                                  // pass in the salt value.
+      )
+
+      // pass along failure message from failed contract deployment and revert.
+      if iszero(spawnedContract) {
+        returndatacopy(0, 0, returndatasize)
+        revert(0, returndatasize)
+      }
+    }
+  }
+
+  /**
+   * @notice Private function for determining the salt and the target deployment
+   * address for the next spawned contract (using create2) based on the contract
+   * creation code.
+   */
+  function _getSaltAndTarget(
+    bytes memory initCode
+  ) private view returns (bytes32 salt, address target) {
     // get the keccak256 hash of the init code for address derivation.
     bytes32 initCodeHash = keccak256(initCode);
 
     // set the initial nonce to be provided when constructing the salt.
     uint256 nonce = 0;
     
-    // declare variables for salt value and code size of derived address.
-    bytes32 salt;
+    // declare variable for code size of derived address.
     uint256 codeSize;
 
     while (true) {
       // derive `CREATE2` salt using `msg.sender` and nonce.
       salt = keccak256(abi.encodePacked(msg.sender, nonce));
 
-      address target = address(    // derive the target deployment address.
+      target = address(    // derive the target deployment address.
         uint160(                   // downcast to match the address type.
           uint256(                 // cast to uint to truncate upper digits.
             keccak256(             // compute CREATE2 hash using 4 inputs.
@@ -266,25 +348,8 @@ contract Spawner {
 
       // otherwise, increment the nonce and derive a new salt.
       nonce++;
-    }
-
-    assembly {
-      let encoded_data := add(0x20, initCode) // load initialization code.
-      let encoded_size := mload(initCode)     // load the init code's length.
-      spawnedContract := create2(             // call `CREATE2` w/ 4 arguments.
-        callvalue,                            // forward any supplied endowment.
-        encoded_data,                         // pass in initialization code.
-        encoded_size,                         // pass in init code's length.
-        salt                                  // pass in the salt value.
-      )
-
-      // pass along failure message from failed contract deployment and revert.
-      if iszero(spawnedContract) {
-        returndatacopy(0, 0, returndatasize)
-        revert(0, returndatasize)
-      }
-    }
-  }
+    }   
+  }   
 
   /**
    * @notice Private function for ensuring that a compact logic contract address
