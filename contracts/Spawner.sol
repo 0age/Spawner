@@ -85,60 +85,6 @@ contract SpawnCompact {
  */
 contract Spawner {
   /**
-   * @notice External view function for finding the address of the next standard
-   * eip-1167 minimal proxy created using `CREATE2` with a given logic contract
-   * and initialization calldata payload.
-   * @param logicContract address The address of the logic contract.
-   * @param initializationCalldata bytes The calldata that will be supplied to
-   * the `DELEGATECALL` from the spawned contract to the logic contract during
-   * contract creation.
-   * @return The address of the next spawned minimal proxy contract with the
-   * given parameters.
-   */
-  function computeNextAddress(
-    address logicContract,
-    bytes memory initializationCalldata
-  ) public view returns (address target) {
-    // place creation code and constructor args of contract to spawn in memory.
-    bytes memory initCode = abi.encodePacked(
-      type(Spawn).creationCode,
-      abi.encode(logicContract, initializationCalldata)
-    );
-
-    // get target address using the constructed initialization code.
-    (, target) = _getSaltAndTarget(initCode);
-  }
-
-  /**
-   * @notice External view function for finding the address of the next compact
-   * eip-1167 minimal proxy created using `CREATE2` with a given logic contract
-   * and initialization calldata payload.
-   * @param compactLogicContract address The address of the logic contract. It
-   * must begin with at least five zero bytes, or ten zeroes.
-   * @param initializationCalldata bytes The calldata that will be supplied to
-   * the `DELEGATECALL` from the spawned contract to the logic contract during
-   * contract creation.
-   * @return The address of the next spawned compact minimal proxy contract with
-   * the given parameters.
-   */
-  function computeNextCompactAddress(
-    address compactLogicContract,
-    bytes memory initializationCalldata
-  ) public view returns (address target) {
-    // ensure that the address is sufficiently compact.
-    _ensureCompact(compactLogicContract);
-
-    // place creation code and constructor args of contract to spawn in memory.
-    bytes memory initCode = abi.encodePacked(
-      type(SpawnCompact).creationCode,
-      abi.encode(compactLogicContract, initializationCalldata)
-    );
-
-    // get target address using the constructed initialization code.
-    (, target) = _getSaltAndTarget(initCode);
-  }
-
-  /**
    * @notice Internal function for spawning an eip-1167 minimal proxy using
    * `CREATE2`.
    * @param logicContract address The address of the logic contract.
@@ -242,6 +188,60 @@ contract Spawner {
 
     // spawn the contract using `CREATE`.
     spawnedContract = _spawnCreate(initCode);
+  }
+
+  /**
+   * @notice Internal view function for finding the address of the next standard
+   * eip-1167 minimal proxy created using `CREATE2` with a given logic contract
+   * and initialization calldata payload.
+   * @param logicContract address The address of the logic contract.
+   * @param initializationCalldata bytes The calldata that will be supplied to
+   * the `DELEGATECALL` from the spawned contract to the logic contract during
+   * contract creation.
+   * @return The address of the next spawned minimal proxy contract with the
+   * given parameters.
+   */
+  function _computeNextAddress(
+    address logicContract,
+    bytes memory initializationCalldata
+  ) internal view returns (address target) {
+    // place creation code and constructor args of contract to spawn in memory.
+    bytes memory initCode = abi.encodePacked(
+      type(Spawn).creationCode,
+      abi.encode(logicContract, initializationCalldata)
+    );
+
+    // get target address using the constructed initialization code.
+    (, target) = _getSaltAndTarget(initCode);
+  }
+
+  /**
+   * @notice Internal view function for finding the address of the next compact
+   * eip-1167 minimal proxy created using `CREATE2` with a given logic contract
+   * and initialization calldata payload.
+   * @param compactLogicContract address The address of the logic contract. It
+   * must begin with at least five zero bytes, or ten zeroes.
+   * @param initializationCalldata bytes The calldata that will be supplied to
+   * the `DELEGATECALL` from the spawned contract to the logic contract during
+   * contract creation.
+   * @return The address of the next spawned compact minimal proxy contract with
+   * the given parameters.
+   */
+  function _computeNextCompactAddress(
+    address compactLogicContract,
+    bytes memory initializationCalldata
+  ) internal view returns (address target) {
+    // ensure that the address is sufficiently compact.
+    _ensureCompact(compactLogicContract);
+
+    // place creation code and constructor args of contract to spawn in memory.
+    bytes memory initCode = abi.encodePacked(
+      type(SpawnCompact).creationCode,
+      abi.encode(compactLogicContract, initializationCalldata)
+    );
+
+    // get target address using the constructed initialization code.
+    (, target) = _getSaltAndTarget(initCode);
   }
 
   /**
