@@ -15,7 +15,7 @@ contract SpawnerTester is Spawner {
     bytes32 testStringHash = keccak256(bytes(testString));
 
     // find an address ahead of time.
-    address precomputeSpawnedContract = computeNextAddress(
+    address precomputeSpawnedContract = _computeNextAddress(
       address(logic),
       abi.encodeWithSelector(logic.initialize.selector, testValue, testString)
     );
@@ -45,7 +45,7 @@ contract SpawnerTester is Spawner {
     require(!ok, "does not prevent re-initialization correctly");
 
     // find the next address ahead of time.
-    precomputeSpawnedContract = computeNextAddress(
+    precomputeSpawnedContract = _computeNextAddress(
       address(logic),
       abi.encodeWithSelector(logic.initialize.selector, testValue, testString)
     );
