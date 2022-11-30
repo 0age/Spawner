@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.8.17;
 
 
 /**
@@ -11,14 +11,14 @@ contract Spawn {
   constructor(
     address logicContract,
     bytes memory initializationCalldata
-  ) public payable {
+  ) payable {
     // delegatecall into the logic contract to perform initialization.
     (bool ok, ) = logicContract.delegatecall(initializationCalldata);
     if (!ok) {
       // pass along failure message from delegatecall and revert.
       assembly {
-        returndatacopy(0, 0, returndatasize)
-        revert(0, returndatasize)
+        returndatacopy(0, 0, returndatasize())
+        revert(0, returndatasize())
       }
     }
 
@@ -49,14 +49,14 @@ contract SpawnCompact {
   constructor(
     address logicContract,
     bytes memory initializationCalldata
-  ) public payable {
+  ) payable {
     // delegatecall into the logic contract to perform initialization.
     (bool ok, ) = logicContract.delegatecall(initializationCalldata);
     if (!ok) {
       // pass along failure message from delegatecall and revert.
       assembly {
-        returndatacopy(0, 0, returndatasize)
-        revert(0, returndatasize)
+        returndatacopy(0, 0, returndatasize())
+        revert(0, returndatasize())
       }
     }
 
@@ -91,7 +91,7 @@ contract Spawner {
    * @param initializationCalldata bytes The calldata that will be supplied to
    * the `DELEGATECALL` from the spawned contract to the logic contract during
    * contract creation.
-   * @return The address of the newly-spawned contract.
+   * @return spawnedContract - the address of the newly-spawned contract.
    */
   function _spawn(
     address logicContract,
@@ -117,7 +117,7 @@ contract Spawner {
    * @param initializationCalldata bytes The calldata that will be supplied to
    * the `DELEGATECALL` from the spawned contract to the logic contract during
    * contract creation.
-   * @return The address of the newly-spawned contract.
+   * @return spawnedContract - the address of the newly-spawned contract.
    */
   function _spawnCompact(
     address compactLogicContract,
@@ -144,7 +144,7 @@ contract Spawner {
    * @param initializationCalldata bytes The calldata that will be supplied to
    * the `DELEGATECALL` from the spawned contract to the logic contract during
    * contract creation.
-   * @return The address of the newly-spawned contract.
+   * @return spawnedContract - the address of the newly-spawned contract.
    */
   function _spawnOldSchool(
     address logicContract,
@@ -171,7 +171,7 @@ contract Spawner {
    * @param initializationCalldata bytes The calldata that will be supplied to
    * the `DELEGATECALL` from the spawned contract to the logic contract during
    * contract creation.
-   * @return The address of the newly-spawned contract.
+   * @return spawnedContract - the address of the newly-spawned contract.
    */
   function _spawnCompactOldSchool(
     address compactLogicContract,
@@ -198,7 +198,7 @@ contract Spawner {
    * @param initializationCalldata bytes The calldata that will be supplied to
    * the `DELEGATECALL` from the spawned contract to the logic contract during
    * contract creation.
-   * @return The address of the next spawned minimal proxy contract with the
+   * @return target - the address of the next spawned minimal proxy contract with the
    * given parameters.
    */
   function _computeNextAddress(
@@ -224,7 +224,7 @@ contract Spawner {
    * @param initializationCalldata bytes The calldata that will be supplied to
    * the `DELEGATECALL` from the spawned contract to the logic contract during
    * contract creation.
-   * @return The address of the next spawned compact minimal proxy contract with
+   * @return target - the address of the next spawned compact minimal proxy contract with
    * the given parameters.
    */
   function _computeNextCompactAddress(
@@ -248,7 +248,7 @@ contract Spawner {
    * @notice Private function for spawning a compact eip-1167 minimal proxy
    * using `CREATE`. Provides logic that is reused by internal functions.
    * @param initCode bytes The contract creation code.
-   * @return The address of the newly-spawned contract.
+   * @return spawnedContract - the address of the newly-spawned contract.
    */
   function _spawnCreate(
     bytes memory initCode
@@ -257,15 +257,15 @@ contract Spawner {
       let encoded_data := add(0x20, initCode) // load initialization code.
       let encoded_size := mload(initCode)     // load the init code's length.
       spawnedContract := create(              // call `CREATE` with 3 arguments.
-        callvalue,                            // forward any supplied endowment.
+        callvalue(),                            // forward any supplied endowment.
         encoded_data,                         // pass in initialization code.
         encoded_size                          // pass in init code's length.
       )
 
       // pass along failure message from failed contract deployment and revert.
       if iszero(spawnedContract) {
-        returndatacopy(0, 0, returndatasize)
-        revert(0, returndatasize)
+        returndatacopy(0, 0, returndatasize())
+        revert(0, returndatasize())
       }
     }
   }
@@ -276,7 +276,7 @@ contract Spawner {
    * salt will also be chosen based on the calling address and a computed nonce
    * that prevents deployments to existing addresses.
    * @param initCode bytes The contract creation code.
-   * @return The address of the newly-spawned contract.
+   * @return spawnedContract - the address of the newly-spawned contract.
    */
   function _spawnCreate2(
     bytes memory initCode
@@ -288,7 +288,7 @@ contract Spawner {
       let encoded_data := add(0x20, initCode) // load initialization code.
       let encoded_size := mload(initCode)     // load the init code's length.
       spawnedContract := create2(             // call `CREATE2` w/ 4 arguments.
-        callvalue,                            // forward any supplied endowment.
+        callvalue(),                            // forward any supplied endowment.
         encoded_data,                         // pass in initialization code.
         encoded_size,                         // pass in init code's length.
         salt                                  // pass in the salt value.
@@ -296,8 +296,8 @@ contract Spawner {
 
       // pass along failure message from failed contract deployment and revert.
       if iszero(spawnedContract) {
-        returndatacopy(0, 0, returndatasize)
-        revert(0, returndatasize)
+        returndatacopy(0, 0, returndatasize())
+        revert(0, returndatasize())
       }
     }
   }
