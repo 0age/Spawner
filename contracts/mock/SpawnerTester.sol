@@ -1,4 +1,4 @@
-pragma solidity 0.5.10;
+pragma solidity ^0.8.17;
 
 import "./ExampleLogicContract.sol";
 import "../Spawner.sol";

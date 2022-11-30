@@ -1,4 +1,4 @@
-pragma solidity 0.5.10;
+pragma solidity ^0.8.17;
 
 
 contract ExampleLogicContract {
@@ -11,7 +11,7 @@ contract ExampleLogicContract {
     string calldata initialTestString
   ) external {
     // only allow this function to be called from within a constructor.
-    assembly { if extcodesize(address) { revert(0, 0) } }
+    assembly { if extcodesize(address()) { revert(0, 0) } }
 
     // perform initialization.
     hasBeenInitialized = true;
